@@ -1,0 +1,84 @@
+Sunday 27th May 2018
+
+Initial shot. I'm planning to take glove vectors and implement k-means clustering and dimension reduction.
+
+After that I will try and learn hamming distance bit-vectors for specific clusters
+
+Results for baseline. 100k words, 95% training the rest asking for the closest word in the db
+
+r@: 10, 100, 1000: 0.470705858828 0.76524695061 0.956808638272
+
+BTW for 10k words, 50% training the results were:
+
+r@: 10, 100, 1000: 0.683663267347 0.943411317736 0.998800239952
+
+For 1k, 95% train r@10 is 0.764
+
+Checking in with:
+
+First basline on glove
+
+Tuesday 29th May 2018
+
+Checking in with:
+
+glove.py initializes mat_sel to very poor result.
+
+Turns out that there is a problem with the idea. We can't allow the bit vectors to converge to zero distance
+or the whole model collapses to the same bits.
+
+I'll try to have the bitvector distance converge to the CS distance. However, first, I want to make sure that the
+sel mat learning we are using works. So the fiorst stage is to try and learn the baseline bitdb
+
+Scrub that. I'll try another time at setting the target bits. This time, one bit at a time, aiming to keep an HD
+similar to the CD
+
+Thursday 31st May
+
+Well at least one thing works. A nice run with kmeans.
+
+Checking in with:
+
+kmeans without dimred working in glove_kmeans.py
+
+Friday 1st June 2018
+
+Don't know how to make it work. The iteration process seems to work very well to move all the elements of the
+array to a position relative to each other kust as desired.However, the r@10 number falls from its initial value of
+60%+ to 40%. Even though the score drops nicely. The baseline is in the high 70's
+
+I've tries changing the pairing every 100 iterations, but the effect persists
+
+There is maybe a hope that of the score gets really low, the r@ will finally go up. The hope is justified by the
+fact that after the drop gets to about 1.8 or less, the r@ does go to the 50's. It would have to drop tp 0.4
+to make the iteration look good enough. It so far seems to get stuck at 1.4 - so 0.4 seems like a distant dream
+
+Checking in with:
+
+Iterated to target distances nicely but error does not beat the deadline
+
+Sunday 3rd June
+
+I got glove_kmeans to work using differential k. What I mean by this is that the closer centroids get a higher
+k in k-NN and the further ones have less. I take the CD of the centroids to divide up a pool of k's (the
+pool is also refered to as the rat (r@). If the cluster has too few members for it's share of the rat, the
+others divide the leftover.
+
+Note in glove_kmeans at this stage this actually makes no difference since knn after kmeans searching for the
+r@1 closest, the closest turns up as the first of the knn if it is in the cluster at all. It only matters
+where the second stage (after the centroid discovery phase) is ANN such as dimred, PQ or HD
+
+Checking in with:
+
+Differential k for clustering works.
+
+Sunday 12th June
+
+CIW:
+
+Made faiss work for sift 1M using the concepts of glove_kmeans.py
+
+Tuesday 14th June
+
+Moved home dir to myfaiss to avoid conflivt with faiss. Sorry I lost the git history. The faiss dir is still there
+
