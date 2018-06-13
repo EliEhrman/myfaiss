@@ -3,17 +3,18 @@ from __future__ import print_function
 import numpy as np
 import os
 
-c_b_small = True
+c_b_small = False
 if c_b_small:
 	os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 	import tensorflow as tf
 	fn_db = '../../data/sift/siftsmall_base.fvecs'
 	fn_q = '../../data/sift/siftsmall_query.fvecs'
 	fn_gt = '../../data/sift/siftsmall_groundtruth.ivecs'
-	c_num_k_eval = 10
-	c_num_clusters_q = 10
+	c_num_k_eval = 2
+	c_num_clusters_q = 100
 	c_num_clusters = 800
 	c_kmeans_num_db_segs = 2
+	c_rat = 100
 else:
 	# os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 	import tensorflow as tf
@@ -24,8 +25,8 @@ else:
 	c_num_clusters_q = 256
 	c_num_clusters = 8192
 	c_kmeans_num_db_segs = 40
+	c_rat = 1000
 
-c_rat = 100
 c_key_dim = 128
 c_kmeans_num_batches = 1
 c_kmeans_iters = 6
@@ -63,11 +64,21 @@ def fvecs_read(filename, c_contiguous=True):
 
 	return fv
 
+def make_norm(fv):
+	en = np.linalg.norm(fv, axis=1)
+	fv = (fv.transpose() / en).transpose()
+	return fv
+
 def load_vecs():
 	nd_db = fvecs_read(fn_db)
 	nd_q = fvecs_read(fn_q)
 	nd_gt = ivecs_read(fn_gt)
 	return nd_db, nd_q, nd_gt
+
+def create_rot():
+	nd_rnd = (np.random.rand(c_key_dim, c_key_dim) -0.5) * 2.
+	q,_ = np.linalg.qr(nd_rnd)
+	return q
 
 def create_baseline(nd_full_db, arr_median):
 	return np.where(nd_full_db > arr_median, np.ones_like(nd_full_db), np.zeros_like(nd_full_db)).astype(np.int)
@@ -399,6 +410,9 @@ def learn(sess, nd_train_recs):
 
 def main():
 	nd_db, nd_q, nd_gt = load_vecs()
+	q_of_qr = create_rot()
+	nd_db, nd_q = np.matmul(nd_db, q_of_qr), np.matmul(nd_q, q_of_qr)
+	# nd_db, nd_q = make_norm(nd_db), make_norm(nd_q)
 	nd_median = np.median(nd_db, axis=0)
 	nd_bin_db, nd_bin_q = create_baseline(nd_db, nd_median), create_baseline(nd_q, nd_median)
 	l_i_test_best = [nd_gt[iq][0] for iq in xrange(nd_q.shape[0])]

@@ -72,13 +72,20 @@ Checking in with:
 
 Differential k for clustering works.
 
-Sunday 12th June
+Sunday 10th June
 
 CIW:
 
 Made faiss work for sift 1M using the concepts of glove_kmeans.py
 
-Tuesday 14th June
+Tuesday 12th June
 
 Moved home dir to myfaiss to avoid conflivt with faiss. Sorry I lost the git history. The faiss dir is still there
 
+Wednesday 13th June
+
+Results for QR are good but now there is no significant increase for clusters over flat.
+
+CIW:
+
+Added QR rotation to bitvec creation.
